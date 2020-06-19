@@ -13,7 +13,7 @@ import os
 import log_initializer
 
 import config
-import datasets
+import datasets2
 from extensions import ImgViewerExtention
 from extensions import SequentialEvaluator
 from imgviewer_conversions import face_img_func, weights_img_func
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     config.load(args.config)
 
     # Setup AFLW dataset
-    train, test = datasets.setup_aflw(config.aflw_cache_path,
+    train, test = datasets2.setup_aflw(config.aflw_cache_path,
                                       config.aflw_sqlite_path,
                                       config.aflw_imgdir_path,
                                       config.aflw_test_rate)

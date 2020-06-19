@@ -5,7 +5,7 @@ import chainer
 
 import argparse
 import cv2
-import datasets
+import datasets2
 import os
 import numpy as np
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         ret, img = cap.read()
         if not ret:
             continue
-        img = cv2.resize(img, datasets.IMG_SIZE)
+        img = cv2.resize(img, datasets2.IMG_SIZE)
         img = img.astype(np.float32)
         img = cv2.normalize(img, None, -0.5, 0.5, cv2.NORM_MINMAX)
         img = np.transpose(img, (2, 0, 1))

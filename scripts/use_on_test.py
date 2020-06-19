@@ -10,7 +10,7 @@ import numpy as np
 import time
 
 import config
-import datasets
+import datasets2
 import drawing
 import log_initializer
 import models
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     config.load(args.config)
 
     # Setup AFLW dataset
-    _, test = datasets.setup_aflw(config.aflw_cache_path,
+    _, test = datasets2.setup_aflw(config.aflw_cache_path,
                                   config.aflw_sqlite_path,
                                   config.aflw_imgdir_path,
                                   config.aflw_test_rate)

@@ -6,7 +6,7 @@ import numpy as np
 import six
 
 import common
-import datasets
+import datasets2
 # import drawing
 import models
 
@@ -68,7 +68,7 @@ def _forward_with_rects(model, img_org, rects, batchsize, xp):
 def _proposal_region(pts, pts_mask, img_rect, landmark_pad_rate=0.1):
     # TODO Improve for rotated rectangles
     # AFLW Template
-    tpl_pts = datasets.aflw_template_landmark()
+    tpl_pts = datasets2.aflw_template_landmark()
     tpl_rect = cv2.boundingRect(tpl_pts)
     # Mask points
     mask_idxs = np.where(pts_mask > 0.5)
