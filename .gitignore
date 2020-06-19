@@ -1,0 +1,12 @@
+*__pycache__
+data
+*.swp
+*.swo
+*.swm
+*.swn
+*.pyc
+*.npz
+
+AFLW
+model_epoch_190
+bvlc_alexnet.caffemodel
