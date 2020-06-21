@@ -3,6 +3,7 @@
  Conversion functions for image viewer extension
 '''
 
+import cupy
 import cv2
 import six
 import numpy as np
@@ -20,6 +21,7 @@ def face_img_func(key, entry, viewer):
     img = entry['img'][0]   # Use only a first data in the batch
     assert(img.ndim == 3 and (img.shape[0] == 1 or img.shape[0] == 3))
     img = np.transpose(img, (1, 2, 0))
+    img = cupy.asnumpy(img)
     img = img.copy()  # for safety
     img += 0.5  # [-0.5:0.5] -> [0:1]
 

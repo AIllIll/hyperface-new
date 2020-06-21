@@ -60,8 +60,11 @@ def _load_raw_aflw(sqlite_path, image_dir):
                 "faces.face_id = metadata.face_id"
     query_res = _exec_sqlite_query(cursor, select_str, from_str, where_str)
     # Register to dataset_dict
+
+    print(66666666666666, len(query_res))
     for face_id, path, rectx, recty, rectw, recth, roll, pitch, yaw, gender\
             in query_res:
+        print(66666666666666, rectx,recty,'rect')
         # Data creation or conversion
         img_path = os.path.join(image_dir, path) if image_dir else path
         landmark = np.zeros((N_LANDMARK, 2), dtype=np.float32)
@@ -237,7 +240,6 @@ class AFLW(chainer.dataset.DatasetMixin):
     def setup_raw(self, sqlite_path, image_dir, log_interval=10):
         # Load raw AFLW dataset
         self.dataset = _load_raw_aflw(sqlite_path, image_dir)
-
         # Calculate selective search rectangles (This takes many minutes)
         logger.info('Calculate selective search rectangles for AFLW')
         for i, entry in enumerate(self.dataset):
@@ -267,7 +269,7 @@ class AFLW(chainer.dataset.DatasetMixin):
         return len(self.dataset)
 
     def get_example(self, i):
-        print(i)
+        # print(i)
         entry = self.dataset[i]
 
         # Raw entry
@@ -279,7 +281,7 @@ class AFLW(chainer.dataset.DatasetMixin):
         special_skip_cnt = 0
         while try_cnt < self.n_try_detect_alt:
             try_cnt += 1
-
+            # print(entry)
             # === Entry variables ===
             img_path = entry['img_path']
             landmark = entry['landmark']
@@ -399,7 +401,7 @@ class AFLW(chainer.dataset.DatasetMixin):
                 'm_visibility': mask_landmark_visib, 'm_pose': mask_pose}
 
 
-def setup_aflw(cache_path, sqlite_path=None, image_dir=None, test_rate=0.04,
+def setup_aflw(cache_path, sqlite_path=None, image_dir=None, test_rate=0.01,
                raw_mode=False):
     # Empty AFLW
     aflw = AFLW()

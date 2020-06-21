@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
         # Create single batch
         imgs = xp.asarray([img])
-        x = chainer.Variable(imgs, volatile=True)
+        x = chainer.Variable(imgs)
 
         # Forward
         y = model(x)

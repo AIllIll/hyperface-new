@@ -10,3 +10,5 @@ data
 AFLW
 model_epoch_190
 bvlc_alexnet.caffemodel
+result
+result_pretrain

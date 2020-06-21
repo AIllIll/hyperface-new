@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import time
+
 import chainer
 
 import argparse
@@ -32,6 +34,9 @@ def _cvt_variable(v):
 
 
 if __name__ == '__main__':
+    init_time = time.time()
+    print('begin at', init_time)
+
     # Argument
     parser = argparse.ArgumentParser(description='HyperFace training script')
     parser.add_argument('--config', '-c', default='config.json',
@@ -78,7 +83,7 @@ if __name__ == '__main__':
 
     # Create single batch
     imgs = xp.asarray([img])
-    x = chainer.Variable(imgs, volatile=True)
+    x = chainer.Variable(imgs)
 
     # Forward
     logger.info('Forward the network')
@@ -115,5 +120,11 @@ if __name__ == '__main__':
 
     # Show image
     logger.info('Show the result image')
-    cv2.imshow('result', img)
-    cv2.waitKey(0)
+
+    # cv2.imshow('result', img)
+    # cv2.waitKey(0)
+    img = img * 255
+    cv2.imwrite('sample_images/lena_face1.png', img)
+
+    print('finished at', time.time())
+    print('cost time', time.time()-init_time)

@@ -138,7 +138,7 @@ if __name__ == '__main__':
     trainer.extend(extensions.LogReport(trigger=log_interval))
     trainer.extend(extensions.PrintReport(
         ['epoch', 'iteration', 'main/loss', 'validation/main/loss']),
-        trigger=log_interval, invoke_before_training=True)
+        trigger=log_interval)
     trainer.extend(extensions.ProgressBar(
         update_interval=progressbar_interval))
 
@@ -163,8 +163,7 @@ if __name__ == '__main__':
     trainer.extend(ImgViewerExtention(
         ['lossgraph'], n_imgs=[1] if args.pretrain else [1 + 5],
         port=config.port_lossgraph, entry_func=lossgraph_entry_func,
-        image_func=lossgraph_img_func), trigger=log_interval,
-        invoke_before_training=True)
+        image_func=lossgraph_img_func), trigger=log_interval)
 
     # Resume
     if args.resume:

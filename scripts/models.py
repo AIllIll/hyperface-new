@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import cupy
 import chainer
 import chainer.functions as F
 import chainer.links as L
@@ -15,7 +15,7 @@ IMG_SIZE = (227, 227)
 
 
 def _disconnect(x):
-    return chainer.Variable(x.data, volatile=x.volatile)
+    return chainer.Variable(x.data)
 
 
 def copy_layers(src_model, dst_model,
@@ -77,22 +77,27 @@ class HyperFaceModel(chainer.Chain):
         # Fusion CNN
         h = F.relu(self.conv_all(h))  # conv_all
         h = F.relu(self.fc_full(h))  # fc_full
-        h = F.dropout(h, train=self.train)
-
+        with chainer.using_config('train', True):
+            h = F.dropout(h, ratio=0.0)
         h_detection = F.relu(self.fc_detection1(h))
-        h_detection = F.dropout(h_detection, train=self.train)
+        with chainer.using_config('train', True):
+            h_detection = F.dropout(h_detection, ratio=0.0)
         h_detection = self.fc_detection2(h_detection)
         h_landmark = F.relu(self.fc_landmarks1(h))
-        h_landmark = F.dropout(h_landmark, train=self.train)
+        with chainer.using_config('train', True):
+            h_landmark = F.dropout(h_landmark, ratio=0.0)
         h_landmark = self.fc_landmarks2(h_landmark)
         h_visibility = F.relu(self.fc_visibility1(h))
-        h_visibility = F.dropout(h_visibility, train=self.train)
+        with chainer.using_config('train', True):
+            h_visibility = F.dropout(h_visibility, ratio=0.0)
         h_visibility = self.fc_visibility2(h_visibility)
         h_pose = F.relu(self.fc_pose1(h))
-        h_pose = F.dropout(h_pose, train=self.train)
+        with chainer.using_config('train', True):
+            h_pose = F.dropout(h_pose, ratio=0.0)
         h_pose = self.fc_pose2(h_pose)
         h_gender = F.relu(self.fc_gender1(h))
-        h_gender = F.dropout(h_gender, train=self.train)
+        with chainer.using_config('train', True):
+            h_gender = F.dropout(h_gender, ratio=0.0)
         h_gender = self.fc_gender2(h_gender)
 
         # Mask and Loss
@@ -102,6 +107,39 @@ class HyperFaceModel(chainer.Chain):
             m_landmark_ew = F.reshape(m_landmark_ew, (-1, N_LANDMARK * 2))
 
             # Masking
+            # h_landmark *= _disconnect(m_landmark)
+            # t_landmark *= _disconnect(m_landmark)
+            # h_landmark *= _disconnect(m_landmark_ew)
+            # t_landmark *= _disconnect(m_landmark_ew)
+            # h_visibility *= _disconnect(m_visibility)
+            # t_visibility *= _disconnect(m_visibility)
+            # h_pose *= _disconnect(m_pose)
+            # t_pose *= _disconnect(m_pose)
+
+            # Masking
+            if not isinstance(m_landmark, chainer.variable.Variable):
+                m_landmark = chainer.Variable(m_landmark)
+            if not isinstance(m_landmark_ew, chainer.variable.Variable):
+                m_landmark_ew = chainer.Variable(m_landmark_ew)
+            if not isinstance(m_visibility, chainer.variable.Variable):
+                m_visibility = chainer.Variable(m_visibility)
+            if not isinstance(m_visibility, chainer.variable.Variable):
+                m_visibility = chainer.Variable(m_visibility)
+            if not isinstance(m_pose, chainer.variable.Variable):
+                m_pose = chainer.Variable(m_pose)
+
+            if not isinstance(h_landmark, chainer.variable.Variable):
+                h_landmark = chainer.Variable(h_landmark)
+            if not isinstance(t_landmark, chainer.variable.Variable):
+                t_landmark = chainer.Variable(t_landmark)
+            if not isinstance(h_visibility, chainer.variable.Variable):
+                h_visibility = chainer.Variable(h_visibility)
+            if not isinstance(t_visibility, chainer.variable.Variable):
+                t_visibility = chainer.Variable(t_visibility)
+            if not isinstance(h_pose, chainer.variable.Variable):
+                h_pose = chainer.Variable(h_pose)
+            if not isinstance(t_pose, chainer.variable.Variable):
+                t_pose = chainer.Variable(t_pose)
             h_landmark *= _disconnect(m_landmark)
             t_landmark *= _disconnect(m_landmark)
             h_landmark *= _disconnect(m_landmark_ew)
@@ -110,6 +148,35 @@ class HyperFaceModel(chainer.Chain):
             t_visibility *= _disconnect(m_visibility)
             h_pose *= _disconnect(m_pose)
             t_pose *= _disconnect(m_pose)
+
+            # print(66666666666666660000000000000, type(m_landmark),  type(m_landmark_ew))
+            # h_landmark = h_landmark.array
+            # print(66666666666666661111111111111, type(h_landmark),  type(t_landmark))
+            # h_landmark *= _disconnect(m_landmark).array
+            # print(66666666666666662222222222222, type(h_landmark),  type(t_landmark))
+            # t_landmark *= _disconnect(m_landmark).array
+            # h_landmark *= _disconnect(m_landmark_ew.array).array
+            # t_landmark *= _disconnect(m_landmark_ew.array).array
+            # h_visibility *= _disconnect(m_visibility).array
+            # t_visibility *= _disconnect(m_visibility).array
+            # h_pose *= _disconnect(m_pose).array
+            # t_pose *= _disconnect(m_pose).array
+
+            # print(66666666666666661111111111111, type(m_landmark),  type(h_landmark))
+            # h_landmark *= _disconnect(m_landmark.copy())
+            # print(66666666666666662222222222222, type(h_landmark))
+            # print(66666666666666663333333333333, type(m_landmark),  type(t_landmark))
+            # t_landmark *= _disconnect(m_landmark.copy()).array
+            # print(66666666666666664444444444444, type(t_landmark))
+            # print(66666666666666665555555555555, type(m_landmark_ew),  type(h_landmark))
+            # h_landmark *= _disconnect(m_landmark_ew)
+            # print(66666666666666662222222222222, type(h_landmark))
+            # t_landmark *= _disconnect(m_landmark_ew).array
+            # h_visibility *= _disconnect(m_visibility)
+            # t_visibility *= _disconnect(m_visibility)
+            # h_pose *= _disconnect(m_pose)
+            # t_pose *= _disconnect(m_pose)
+
 
             # Loss
             loss_detection = F.softmax_cross_entropy(h_detection, t_detection)
@@ -195,8 +262,12 @@ class RCNNFaceModel(chainer.Chain):
         h = F.relu(self.conv5(h))  # conv5
         h = F.max_pooling_2d(h, 3, stride=2, pad=0)  # pool5
 
-        h = F.dropout(F.relu(self.fc6(h)), train=self.train)  # fc6
-        h = F.dropout(F.relu(self.fc7(h)), train=self.train)  # fc7
+        
+        with chainer.using_config('train', True):
+            h = F.dropout(F.relu(self.fc6(h)), ratio=0.0)  # fc6
+        
+        with chainer.using_config('train', True):
+            h = F.dropout(F.relu(self.fc7(h)), ratio=0.0)  # fc7
         h_detection = self.fc8(h)  # fc8
 
         # Loss
